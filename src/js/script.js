@@ -200,11 +200,34 @@
     processOrder() {
       const thisProduct = this;
       console.log(thisProduct);
-
+      // formData - opcje zaznaczone
       const formData = utils.serializeFormToObject(thisProduct.form);
       console.log('formData', formData);
-      const allFormInput = document.
-      console.log(thisProduct.formInputs);
+      console.log(thisProduct.data['params']);
+
+      let productPrice = thisProduct.data['price'];
+      console.log('productPrice', productPrice);
+      const params = thisProduct.data['params'];
+      for (let productGroup in params) {
+        console.log(productGroup);
+        console.log(params[productGroup]);
+        const options = params[productGroup]['options'];
+        for (let productName in options) {
+          console.log(productName);
+          const price = options[productName]['price'];
+          console.log('price', price);
+          const defaults = options[productName]['default'];
+          console.log('defaults', defaults);
+          if (defaults == undefined && formData[productGroup].indexOf(productName) != -1) {
+            productPrice = productPrice + price;
+          } else if (defaults == true && formData[productGroup].indexOf(productName) == -1) {
+            productPrice = productPrice - price;
+          }
+        }
+      }
+      console.log('final price', productPrice);
+      const htmlPrice = thisProduct.element.querySelector(select.menuProduct.priceElem);
+      htmlPrice.textContent = productPrice;
     }
 
   }
