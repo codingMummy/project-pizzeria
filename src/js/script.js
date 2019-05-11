@@ -41,13 +41,13 @@
     },
   };
 
-  const settings = {
-    amountWidget: {
-      defaultValue: 1,
-      defaultMin: 1,
-      defaultMax: 9,
-    }
-  };
+  // const settings = {
+  //   amountWidget: {
+  //     defaultValue: 1,
+  //     defaultMin: 1,
+  //     defaultMax: 9,
+  //   }
+  // };
 
   const templates = {
     // menuProduct jest tworzona za pomocą biblioteki Handlebars
@@ -150,12 +150,12 @@
 
         const active = document.querySelector(select.all.menuProductsActive);
         if (active != null) {
-          active.classList.remove('active');
+          active.classList.remove(classNames.menuProduct.wrapperActive);
           if (active != thisProduct.element) {
-            thisProduct.element.classList.add('active');
+            thisProduct.element.classList.add(classNames.menuProduct.wrapperActive);
           }
         } else {
-          thisProduct.element.classList.add('active');
+          thisProduct.element.classList.add(classNames.menuProduct.wrapperActive);
         }
 
         /* find the clickable trigger (the element that should react to clicking) - znajdź klikalny przycisk (element, który powinien zareagować na kliknięcie)  */
