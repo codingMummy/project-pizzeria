@@ -1,7 +1,3 @@
-import {
-  settings
-} from "cluster";
-
 /* global Handlebars, utils, dataSource */ // eslint-disable-line no-unused-vars
 
 {
@@ -45,13 +41,13 @@ import {
     },
   };
 
-  // const settings = {
-  //   amountWidget: {
-  //     defaultValue: 1,
-  //     defaultMin: 1,
-  //     defaultMax: 9,
-  //   }
-  // };
+  const settings = {
+    amountWidget: {
+      defaultValue: 1,
+      defaultMin: 1,
+      defaultMax: 9,
+    }
+  };
 
   const templates = {
     // menuProduct jest tworzona za pomocą biblioteki Handlebars
@@ -63,7 +59,7 @@ import {
   class AmountWidget {
     constructor(element) {
       const thisWidget = this;
-      thisWidget.value = settings.amountWidget.defaultMin;
+      thisWidget.value = settings.amountWidget.defaultValue;
       thisWidget.getElements(element);
       thisWidget.setValue(thisWidget.value);
       console.log('AmountWidget:', thisWidget);
@@ -90,6 +86,8 @@ import {
         thisWidget.value = newValue;
         thisWidget.input.value = thisWidget.value;
         thisWidget.announce();
+      } else {
+        thisWidget.input.value = thisWidget.value;
       }
 
 
