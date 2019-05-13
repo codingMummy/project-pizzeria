@@ -54,6 +54,18 @@
     menuProduct: Handlebars.compile(document.querySelector(select.templateOf.menuProduct).innerHTML),
   };
 
+
+
+  class AmountWidget {
+    constructor(element) {
+      const thisWidget = this;
+      console.log('AmountWidget:', thisWidget);
+      console.log('constructor arguments', element);
+    }
+  }
+
+
+
   const app = {
 
 
@@ -100,7 +112,9 @@
       thisProduct.getElements();
       thisProduct.initAccordion();
       thisProduct.initOrderForm();
+      thisProduct.initAmountWidget();
       thisProduct.processOrder();
+
       console.log('new Product:', thisProduct);
     }
 
@@ -137,8 +151,9 @@
 
       thisProduct.cartButton = thisProduct.element.querySelector(select.menuProduct.cartButton);
       thisProduct.priceElem = thisProduct.element.querySelector(select.menuProduct.priceElem);
+      thisProduct.imageWrapper = thisProduct.element.querySelector(select.menuProduct.imageWrapper);
+      thisProduct.amountWidgetElem = thisProduct.element.querySelector(select.menuProduct.amountWidget);
     }
-
 
     initAccordion() {
       const thisProduct = this;
@@ -197,6 +212,15 @@
     }
 
 
+    initAmountWidget() {
+      const thisProduct = this;
+
+      thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
+
+
+    }
+
+
     processOrder() {
       const thisProduct = this;
       console.log(thisProduct);
@@ -212,16 +236,30 @@
         console.log(productGroup);
         console.log(params[productGroup]);
         const options = params[productGroup]['options'];
+
         for (let productName in options) {
           console.log(productName);
           const price = options[productName]['price'];
           console.log('price', price);
           const defaults = options[productName]['default'];
           console.log('defaults', defaults);
-          if (defaults == undefined && formData[productGroup].indexOf(productName) != -1) {
+          // pętla poniżej iteruje po parametrach
+          if (defaults == undefined && formData[productGroup] != undefined && formData[productGroup].indexOf(productName) != -1) {
             productPrice = productPrice + price;
-          } else if (defaults == true && formData[productGroup].indexOf(productName) == -1) {
+            // pętla poniżej iteruje po opcjach parametru
+          } else if (defaults == true && (formData[productGroup] == undefined || formData[productGroup].indexOf(productName) == -1)) {
             productPrice = productPrice - price;
+          }
+          const imgs = thisProduct.imageWrapper.querySelectorAll('.' + productGroup + '-' + productName);
+          console.log('picture', imgs);
+          console.log('.' + productGroup + '-' + productName);
+          for (let img of imgs) {
+            console.log(img);
+            if (formData[productGroup] != undefined && formData[productGroup].indexOf(productName) != -1) {
+              img.classList.add(classNames.menuProduct.imageVisible);
+            } else {
+              img.classList.remove(classNames.menuProduct.imageVisible);
+            }
           }
         }
       }
