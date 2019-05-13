@@ -1,3 +1,7 @@
+import {
+  settings
+} from "cluster";
+
 /* global Handlebars, utils, dataSource */ // eslint-disable-line no-unused-vars
 
 {
@@ -59,9 +63,63 @@
   class AmountWidget {
     constructor(element) {
       const thisWidget = this;
+      thisWidget.value = settings.amountWidget.defaultMin;
+      thisWidget.getElements(element);
+      thisWidget.setValue(thisWidget.value);
       console.log('AmountWidget:', thisWidget);
       console.log('constructor arguments', element);
+      thisWidget.initActions();
     }
+
+    getElements(element) {
+      const thisWidget = this;
+
+      thisWidget.element = element;
+      thisWidget.input = thisWidget.element.querySelector(select.widgets.amount.input);
+      thisWidget.linkDecrease = thisWidget.element.querySelector(select.widgets.amount.linkDecrease);
+      thisWidget.linkIncrease = thisWidget.element.querySelector(select.widgets.amount.linkIncrease);
+
+    }
+
+    setValue(value) {
+      const thisWidget = this;
+
+      const newValue = parseInt(value);
+
+      if (newValue >= settings.amountWidget.defaultMin && newValue <= settings.amountWidget.defaultMax) {
+        thisWidget.value = newValue;
+        thisWidget.input.value = thisWidget.value;
+        thisWidget.announce();
+      }
+
+
+    }
+
+    initActions() {
+      const thisWidget = this;
+      thisWidget.input.addEventListener('change', (e) => {
+        e.preventDefault();
+        console.log('co to jest', this);
+        thisWidget.setValue(thisWidget.input.value);
+      });
+      thisWidget.linkIncrease.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('co to jest', this);
+        thisWidget.setValue(parseInt(thisWidget.input.value) + 1);
+      });
+      thisWidget.linkDecrease.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('co to jest', this);
+        thisWidget.setValue(parseInt(thisWidget.input.value) - 1);
+      });
+    }
+
+    announce() {
+      const thisWidget = this;
+      const event = new Event('updated');
+      thisWidget.element.dispatchEvent(event);
+    }
+
   }
 
 
@@ -192,7 +250,7 @@
     }
     initOrderForm() {
       const thisProduct = this;
-      console.log(thisProduct);
+      // console.log(thisProduct);
 
       thisProduct.form.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -216,7 +274,9 @@
       const thisProduct = this;
 
       thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
-
+      thisProduct.amountWidgetElem.addEventListener('updated', () => {
+        thisProduct.processOrder();
+      });
 
     }
 
@@ -227,18 +287,18 @@
       // formData - opcje zaznaczone
       const formData = utils.serializeFormToObject(thisProduct.form);
       console.log('formData', formData);
-      console.log(thisProduct.data['params']);
+      // console.log(thisProduct.data['params']);
 
       let productPrice = thisProduct.data['price'];
       console.log('productPrice', productPrice);
       const params = thisProduct.data['params'];
       for (let productGroup in params) {
-        console.log(productGroup);
-        console.log(params[productGroup]);
+        // console.log(productGroup);
+        // console.log(params[productGroup]);
         const options = params[productGroup]['options'];
 
         for (let productName in options) {
-          console.log(productName);
+          // console.log(productName);
           const price = options[productName]['price'];
           console.log('price', price);
           const defaults = options[productName]['default'];
@@ -251,8 +311,8 @@
             productPrice = productPrice - price;
           }
           const imgs = thisProduct.imageWrapper.querySelectorAll('.' + productGroup + '-' + productName);
-          console.log('picture', imgs);
-          console.log('.' + productGroup + '-' + productName);
+          // console.log('picture', imgs);
+          // console.log('.' + productGroup + '-' + productName);
           for (let img of imgs) {
             console.log(img);
             if (formData[productGroup] != undefined && formData[productGroup].indexOf(productName) != -1) {
@@ -265,7 +325,7 @@
       }
       console.log('final price', productPrice);
       const htmlPrice = thisProduct.element.querySelector(select.menuProduct.priceElem);
-      htmlPrice.textContent = productPrice;
+      htmlPrice.textContent = productPrice * thisProduct.amountWidget.value;
     }
 
   }
