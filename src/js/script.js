@@ -163,7 +163,27 @@
       thisCart.getElements(element);
       thisCart.initActions();
       console.log('new Cart', thisCart);
+
+
     }
+    add(menuProduct) {
+      const thisCart = this;
+
+      const generatedHTML = templates.cartProduct(menuProduct);
+      // console.log(generatedHTML);
+
+      /* create element using utils.createElementFromHTML - tworzenie elementu DOM */
+      /* CO TO JEST utils.createDOMFromHTML ???, element DOM zapisany jest jako właściwość instalacji */
+      const element = utils.createDOMFromHTML(generatedHTML);
+
+
+      /* add element to menu - dodawanie stworzonego elementu na stronę */
+      // za pomocą metody appendChild
+      thisCart.dom.productList.appendChild(element);
+
+      console.log('adding product', menuProduct);
+    }
+
 
     getElements(element) {
       const thisCart = this;
@@ -172,6 +192,7 @@
 
       thisCart.dom.wrapper = element;
       thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
+      thisCart.dom.productList = thisCart.dom.wrapper.querySelector(select.cart.productList);
     }
     initActions() {
       const thisCart = this;
@@ -341,9 +362,16 @@
       thisProduct.cartButton.addEventListener('click', function (event) {
         event.preventDefault();
         thisProduct.processOrder();
+        thisProduct.addToCart();
       });
     }
+    addToCart() {
+      const thisProduct = this;
+      thisProduct.name = thisProduct.data.name;
+      thisProduct.amount = thisProduct.amountWidget.value;
 
+      app.cart.add(thisProduct);
+    }
 
     initAmountWidget() {
       const thisProduct = this;
@@ -352,6 +380,8 @@
       thisProduct.amountWidgetElem.addEventListener('updated', () => {
         thisProduct.processOrder();
       });
+
+
 
     }
 
@@ -367,6 +397,9 @@
       let productPrice = thisProduct.data['price'];
       console.log('productPrice', productPrice);
       const params = thisProduct.data['params'];
+
+      thisProduct.params = {};
+
       for (let productGroup in params) {
         // console.log(productGroup);
         // console.log(params[productGroup]);
@@ -378,12 +411,22 @@
           console.log('price', price);
           const defaults = options[productName]['default'];
           console.log('defaults', defaults);
+          const optionSelected = formData[productGroup] != undefined && formData[productGroup].indexOf(productName) != -1;
           // pętla poniżej iteruje po parametrach
-          if (defaults == undefined && formData[productGroup] != undefined && formData[productGroup].indexOf(productName) != -1) {
+          if (defaults == undefined && optionSelected) {
             productPrice = productPrice + price;
             // pętla poniżej iteruje po opcjach parametru
           } else if (defaults == true && (formData[productGroup] == undefined || formData[productGroup].indexOf(productName) == -1)) {
             productPrice = productPrice - price;
+          }
+          if (optionSelected) {
+            if (!thisProduct.params[productGroup]) {
+              thisProduct.params[productGroup] = {
+                label: params[productGroup].label,
+                options: {},
+              };
+            }
+            thisProduct.params[productGroup].options[productName] = options[productName].label;
           }
           const imgs = thisProduct.imageWrapper.querySelectorAll('.' + productGroup + '-' + productName);
           // console.log('picture', imgs);
@@ -395,12 +438,16 @@
             } else {
               img.classList.remove(classNames.menuProduct.imageVisible);
             }
+
           }
         }
       }
       console.log('final price', productPrice);
       const htmlPrice = thisProduct.element.querySelector(select.menuProduct.priceElem);
-      htmlPrice.textContent = productPrice * thisProduct.amountWidget.value;
+      thisProduct.priceSingle = productPrice;
+      thisProduct.price = productPrice * thisProduct.amountWidget.value;
+      htmlPrice.textContent = thisProduct.price;
+      console.log('productParams', thisProduct.params);
     }
 
   }
