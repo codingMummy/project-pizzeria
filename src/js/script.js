@@ -240,10 +240,7 @@
     remove(cartProduct) {
       const thisCart = this;
       const index = thisCart.products.indexOf(cartProduct);
-      console.log(index);
-      console.log('przed', thisCart.products);
-      thisCart.products = thisCart.products.splice(index, 1);
-      console.log('po', thisCart.products);
+      thisCart.products.splice(index, 1);
       thisCart.dom.productList.removeChild(cartProduct.dom.wrapper);
       thisCart.update();
     }
